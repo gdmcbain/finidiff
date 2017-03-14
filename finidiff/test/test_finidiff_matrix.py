@@ -10,7 +10,7 @@ from scipy.special import gamma
 from ..finidiff import finidiff_matrix
 
 
-class TestFinidiff(unittest.TestCase):
+class TestFinidiffMatrix(unittest.TestCase):
 
     def test_low_even_orders_on_a_uniform_grid(self):
         'first to fourth-order on an even grid of seven points'
