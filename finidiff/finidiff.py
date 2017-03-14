@@ -116,9 +116,13 @@ def finidiff_matrix2_mod(D, x, s, p=0, q=None):
         old_stencil = np.concatenate([np.array([s]), x[new_stencil]])
         b = finidiff(old_stencil, s, p)
         k = finidiff(old_stencil, x[0], 2)
-        D[0, new_stencil] = k[[1, 2]] - k[0] * b[[2, 3]] / b[0]
+        D[0, new_stencil] = k[1:3] - k[0] * b[:2] / b[0]
 
     elif i < n:                 # internal interface
         raise NotImplementedError
     else:                       # s = x[-1], right boundary
-        raise NotImplementedError
+        new_stencil = [-2, -1]
+        old_stencil = np.concatenate([x[new_stencil], np.array([s])])
+        b = finidiff(old_stencil, s, p)
+        k = finidiff(old_stencil, x[-1], 2)
+        D[-1, new_stencil] = k[:2] - k[2] * b[:2] / b[2]
