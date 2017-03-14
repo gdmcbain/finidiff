@@ -86,7 +86,7 @@ def finidiff_matrix(x, q):
 
     return coo_matrix((d, (ri, ci)), (n, n)), reach
 
-def finidiff_matrix2_mod(D, x, s, p, q):
+def finidiff_matrix2_mod(D, x, s, p=0, q=None):
     '''Return the differentiation matrix with a boundary condition imposed
 
     :param D: coo_matrix
@@ -98,11 +98,12 @@ def finidiff_matrix2_mod(D, x, s, p, q):
     :param p: int or float: for homogeneous Dirichlet or Neumann
     condition at a boundary point, 0 or 1, resp., and q isn't
     needed. For an interfacial condition, p and q are the thermal
-    conductivities on the left and right sides of s.
+    conductivities on the left and right sides of s.  Optional
+    [default: 0]
 
     :param q: float, optional (only needed if min(x) < s < max(x)),
     only needed for interfacial condition in which case it is the
-    thermal conductivity on the right.
+    thermal conductivity on the right.  Optional [default: None]
 
     '''
     
