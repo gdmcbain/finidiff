@@ -82,6 +82,42 @@ def finidiff_matrix(x, q):
         entries = (row - (1 + reach)) * nzr + np.arange(nzr)
         ri[entries] = row
         ci[entries] = np.arange(row - reach, row + reach + 1, dtype=np.uint)
-        d[entries] = finidiff(x[ci[entries]], x[row], q)
+        d[entries] = finidiff(np.asarray(x)[ci[entries]], x[row], q)
 
     return coo_matrix((d, (ri, ci)), (n, n)), reach
+
+def finidiff_matrix2_mod(D, x, s, p, q):
+    '''Return the differentiation matrix with a boundary condition imposed
+
+    :param D: coo_matrix
+
+    :param x: grid, sequence of floats
+
+    :param s: float, coordinate of boundary
+
+    :param p: int or float: for homogeneous Dirichlet or Neumann
+    condition at a boundary point, 0 or 1, resp., and q isn't
+    needed. For an interfacial condition, p and q are the thermal
+    conductivities on the left and right sides of s.
+
+    :param q: float, optional (only needed if min(x) < s < max(x)),
+    only needed for interfacial condition in which case it is the
+    thermal conductivity on the right.
+
+    '''
+    
+    
+    n = len(x)
+
+    i = sum(x < s)              # x[i-1] < s < x[i]
+    if i == 0:                  # s == x[0], left boundary
+        new_stencil = [0, 1]
+        old_stencil = np.concatenate([np.array([s]), x[new_stencil]])
+        b = finidiff(old_stencil, s, p)
+        k = finidiff(old_stencil, x[0], 2)
+        D[0, new_stencil] = k[[1, 2]] - k[0] * b[[2, 3]] / b[0]
+
+    elif i < n:                 # internal interface
+        raise NotImplementedError
+    else:                       # s = x[-1], right boundary
+        raise NotImplementedError
