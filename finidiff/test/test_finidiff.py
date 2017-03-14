@@ -33,6 +33,6 @@ class TestFinidiff(unittest.TestCase):
         for i in range(n + 1):
             np.testing.assert_almost_equal(d.dot(x ** i),
                                            0 if i < n else gamma(n + 1),
-                                           3)
+                                           2)
 
 
