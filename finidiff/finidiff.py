@@ -126,3 +126,78 @@ def finidiff_matrix2_mod(D, x, s, p=0, q=None):
         b = finidiff(old_stencil, s, p)
         k = finidiff(old_stencil, x[-1], 2)
         D[-1, new_stencil] = k[:2] - k[2] * b[:2] / b[2]
+
+
+def finidiff_matrix_dirichlet(x, q, xl, xr):
+    '''Construct a sparse centred differentiation matrix
+
+    for the q-th derivative on the abscissae x interior to the segment
+    from xl to xr, assuming zeros of sufficiently high order at the
+    boundaries; e.g. simple zeros if q == 2 and double zeros if q ==
+    4.  The reach of each stencil is the least integer at least half
+    the order q, and the length of x must be at least twice this
+    reach.
+
+    The matrix acts on a column vector of ordinates to produce a
+    column vector approximating the derivative of order q at the
+    abscissae. For peripheral points (those with stencils reaching
+    outside x), the derivative is computed using the available points
+    supplemented with one order of zero at the relevant terminal point
+    for each missing point.
+
+    :param x: numpy.ndarray, ndims == 1, abscissæ
+
+    :param q: int > 0, order of derivative
+
+    :param xl: float, left coordinate
+
+    :param xr: float, right coordinate
+
+    Background theory
+    -----------------
+
+    As in finidiff, r is the reach of the stencil from the evaluation
+    point; i.e., an interior stencil reaches r points on either side.
+
+    On the left, we affect the first r rows, adding i + r entries to
+    the i-th.  Thus on left and right we add 2 * sum(1 + np.arange(r)
+    + r) = r * (3 * r + 1).
+
+    The row indices
+    ===============
+
+    Of these, the first reach + 1 is in row 0, the next reach + 2 in
+    row 1, the next reach + 3 in row 3, and so on up to reach.
+
+    ...
+
+    '''
+
+    n = len(x)
+    D, reach = finidiff_matrix(x, q)
+
+    if (2 * reach > n):
+        raise ValueError("Can't compute order %d derivative "
+                         "with a boundary condition on %d points".format(
+                             q, n))
+
+    nz = reach * (3 * reach + 1)
+    d = np.zeros(nz)
+
+    ril = np.concatenate([[i] * (reach + i + 1) for i in range(reach)])
+    ri = np.concatenate([ril, n - 1 - ril])
+
+    cil = np.concatenate([np.arange(reach + i + 1) for i in range(reach)])
+    ci = np.concatenate([cil, n - 1 - cil])
+
+    ii = 0
+    for i in range(reach):      # rows for left-peripheral points
+        star = ii + np.arange(ii + i + reach)
+        ii += i + reach
+        b = 1 + reach - i
+        d[star] = finidiff(x[:reach + i], x[i], q, b, xl)
+
+        d[nz // 2 + star] = np.flipud(finidiff(x[-reach-i:], x[-1-i],
+                                               q, b, xr))
+
+    return D + coo_matrix((d, (ri, ci)), D.shape)
