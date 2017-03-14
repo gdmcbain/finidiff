@@ -6,7 +6,7 @@ import unittest
 import numpy as np
 from scipy.special import gamma
 
-from finidiff import finidiff, postpad
+from ..finidiff import finidiff, postpad
 
 class TestFinidiff(unittest.TestCase):
 
