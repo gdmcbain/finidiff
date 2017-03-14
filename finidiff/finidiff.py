@@ -9,8 +9,11 @@
 
 '''
 
+from __future__ import absolute_import, division, print_function
+
 import numpy as np
 from scipy.special import gamma
+from scipy.sparse import coo_matrix
 
 
 def postpad(x, l):
@@ -72,12 +75,13 @@ def finidiff_matrix(x, q):
     reach = (q + 1) // 2            # the stencil's reach
     nzr = 2 * reach + 1             # entries per row
     nz = (n - 2 * reach) * nzr      # total number of entries
-    ri, ci, d = np.zeros((3, nz))
+    ri, ci = np.zeros((2, nz), dtype=np.uint)
+    d = np.zeros(nz)
 
-    for row in np.arange(1 + reach, n - reach + 1):
-        columns = (row - (1 + reach)) * nzr + 1 + np.arange(nzr)
-        ri[columns] = row
-        ci[columns] = np.arange(row - reach, row + reach + 1, dtype=np.uint)
-        d[columns] = finidiff(x[ci[columns]], x[row], q)
+    for row in np.arange(reach, n - reach):
+        entries = (row - (1 + reach)) * nzr + np.arange(nzr)
+        ri[entries] = row
+        ci[entries] = np.arange(row - reach, row + reach + 1, dtype=np.uint)
+        d[entries] = finidiff(x[ci[entries]], x[row], q)
 
     return coo_matrix((d, (ri, ci)), (n, n)), reach
