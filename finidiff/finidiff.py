@@ -194,7 +194,7 @@ def finidiff_matrix_dirichlet(x, q, xl, xr):
     for i in range(reach):      # rows for left-peripheral points
         star = ii + np.arange(ii + i + reach)
         ii += i + reach
-        b = 1 + reach - i
+        b = reach - i
         d[star] = finidiff(x[:reach + i], x[i], q, b, xl)
 
         d[nz // 2 + star] = np.flipud(finidiff(x[-reach-i:], x[-1-i],
